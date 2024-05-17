@@ -6,16 +6,22 @@ using System.Text;
 using System.Threading.Tasks;
 using Effektive_Praesentationen.Model;
 using CommunityToolkit.Mvvm.ComponentModel;
+using Effektive_Praesentationen.ViewModel;
 
 namespace Effektive_Praesentationen.Model
 {
     public partial class Chapters : ObservableObject
     {
+        public Chapters()
+        {
+            ChapterList = new List<Chapter>();
+        }
+
         [ObservableProperty]
         private string? defaultChapter;
 
         [ObservableProperty]
-        private Chapter[]? chapterList;
+        private List<Chapter>? chapterList;
 
         [ObservableProperty]
         private string? databasePath;

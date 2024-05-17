@@ -10,7 +10,7 @@
              mc:Ignorable="d"
              Background="#ffffff"
              d:DesignHeight="450" d:DesignWidth="800"
-    xmlns:System="clr-namespace:System;assembly=System.Runtime">
+             xmlns:System="clr-namespace:System;assembly=System.Runtime">
     <UserControl.Resources>
         <System:String x:Key="DragAreaText">Drop files here or click to upload</System:String>
 
@@ -40,6 +40,20 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        <Style x:Key="ExportButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#20E378" />
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" Padding="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -52,13 +66,13 @@
                 <Border.BorderBrush>
                     <VisualBrush>
                         <VisualBrush.Visual>
-                            <Rectangle StrokeDashArray="4 2" Stroke="Gray" StrokeThickness="1"
-  Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualWidth}"
-  Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualHeight}"/>
+                            <Rectangle StrokeDashArray="4 2" Stroke="Gray" StrokeThickness="1" 
+                                       Width="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualWidth}"
+                                       Height="{Binding RelativeSource={RelativeSource AncestorType={x:Type Border}}, Path=ActualHeight}"/>
                         </VisualBrush.Visual>
                     </VisualBrush>
                 </Border.BorderBrush>
-
+                
                 <Button Background="#FFECECEC" extension:DropFilesBehaviorExtension.IsEnabled="True" extension:OpenFileDialogBehaviorExtension.IsEnabled="True" Height="200" Width="400" BorderBrush="#0000">
                     <Grid Height="200" Width="400" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Grid.ColumnDefinitions>
@@ -74,12 +88,27 @@
                 </Button>
             </Border>
         </StackPanel>
+        <ComboBox ItemsSource="{Binding UsbService.UsbDrives}" VerticalAlignment="Top" HorizontalAlignment="Left" Height="30" Width="225" SelectedItem="{Binding SelectedDrive}" SelectionChanged="ComboBox_SelectionChanged">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock  Text="{Binding}"/>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
         <Button Content="Present" Height="32" Width="128" VerticalAlignment="Bottom" HorizontalAlignment="Right" Command="{Binding NavigateToInactiveLoopCommand}" 
-                BorderBrush="{x:Null}" Foreground="White" Margin="0,0,24,24" Style="{StaticResource PresentButtonStyle}">
+                BorderBrush="{x:Null}" Margin="0,0,24,24" Style="{StaticResource PresentButtonStyle}">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="16"/>
                 </Style>
+            </Button.Resources>
+        </Button>
+        <Button Content="Export" Height="32" Width="128" VerticalAlignment="Top" HorizontalAlignment="Left" Command="{Binding ExportCommand}" 
+                BorderBrush="{x:Null}" Margin="250,0,0,0" Style="{StaticResource ExportButtonStyle}">
+            <Button.Resources>
+            <Style TargetType="Border">
+                <Setter Property="CornerRadius" Value="16"/>
+            </Style>
             </Button.Resources>
         </Button>
     </Grid>
