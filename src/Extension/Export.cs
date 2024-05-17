@@ -36,7 +36,6 @@ namespace Effektive_Praesentationen.Extension
                     CopyExe(newAppPath);
                     CopyZip(newAppPath);
                     CopyDlls(newAppPath);
-                    DeleteLocalFiles();
                 }
                 Console.WriteLine("Export successful");
             }
@@ -174,12 +173,6 @@ namespace Effektive_Praesentationen.Extension
             {
                 throw new Exception("Unable to copy zip");
             }
-        }
-
-        private static void DeleteLocalFiles()
-        {
-            //Directory.Delete(Path.Combine(Environment.CurrentDirectory, "state\\media"),true);
-            File.Delete(Path.Combine(Environment.CurrentDirectory, "state\\config.json"));
         }
     }
 }

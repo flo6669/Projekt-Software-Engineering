@@ -82,7 +82,7 @@
                         <Image Source="../Assets/upload.png" Margin="0,53,0,88" HorizontalAlignment="Center" Width="59"/>
                         <TextBlock x:Name="DragAreaText" TextWrapping="Wrap" Text="{DynamicResource DragAreaText}" 
                                    Width="290" Height="34" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="20" Margin="0,131,0,0"/>
-                        <TextBlock x:Name="DragAreaFile" TextWrapping="Wrap" Text="{Binding Chapters.DefaultChapter}" 
+                        <TextBlock x:Name="DragAreaFile" TextWrapping="Wrap" Text="{Binding FeedbackText}" 
                                    Width="344" Height="30" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,160,0,0" TextAlignment="Center"/>
                     </Grid>
                 </Button>

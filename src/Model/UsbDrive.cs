@@ -16,8 +16,6 @@ namespace Effektive_Praesentationen.Model
         public long TotalFreeSpace { get; set; }
         public override string ToString()
         {
-            string test1= Path.GetPathRoot(Environment.CurrentDirectory);
-            string test2 = Name;
             if (Path.GetPathRoot(Environment.CurrentDirectory) == Name)
                 return "Desktop";
             else

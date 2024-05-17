@@ -30,11 +30,13 @@ namespace Effektive_Praesentationen.ViewModel
         [NotifyPropertyChangedFor(nameof(FileValid))]
         [NotifyCanExecuteChangedFor(nameof(NavigateToInactiveLoopCommand))]
         [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
-        private string? _change; //only there because changing Chapters.DefaultChapter does not trigger the NotifyPropertyChangedFor
+        private string _fileToAdd;
+
+        [ObservableProperty]
+        public string? _feedbackText;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(DriveChosen))]
-        [NotifyPropertyChangedFor(nameof(CanExport))]
         [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
         private UsbDrive? _selectedDrive;
 
@@ -83,11 +85,11 @@ namespace Effektive_Praesentationen.ViewModel
         {
             get
             {
-                if (String.IsNullOrEmpty(Chapters.DefaultChapter))
+                if (String.IsNullOrEmpty(FileToAdd))
                 {
                     return false;
                 }
-                string fileExtension = Path.GetExtension(Chapters.DefaultChapter);
+                string fileExtension = Path.GetExtension(FileToAdd);
                 if (!(fileExtension == ".mp4" || fileExtension == ".mkv" || fileExtension == ".mov"))
                 {
                     return false;
@@ -117,54 +119,43 @@ namespace Effektive_Praesentationen.ViewModel
             }
         }
 
-        /// <summary>
-        /// true, when file and drive are selected, false otherwise
-        /// </summary>
-        public bool CanExport
+        public async Task OnFilesDropped(string[] files)
         {
-            get
+            FileToAdd = files[0];
+            if(FileValid)
             {
-                if (DriveChosen && FileValid)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                Chapters.ChapterList.Add(new Chapter { Description = "Description", Title = Path.GetFileName(files[0]), Loop = false });
+                await Task.Run(() => SaveService.PackageMedia(files.ToList()));
+                FeedbackText = "Datei erfolgreich hinzugefügt";
+            }
+            else
+            {
+                FeedbackText = "Fehler: Dateiendung nicht unterstützt";
             }
         }
 
-
-        public void OnFilesDropped(string[] files)
+        public async Task OnFileSelected(string[] files)
         {
-            Chapters.DefaultChapter = files[0];
-            Change = files[0];
-        }
-
-        public void OnFileSelected(string[] files)
-        {
-            Chapters.DefaultChapter = files[0];
-            Change = files[0];
+            FileToAdd = files[0];
+            FeedbackText = "";
+            if (FileValid)
+            {
+                Chapters.ChapterList.Add(new Chapter { Description = "Description", Title = Path.GetFileName(files[0]), Loop = false });
+                await Task.Run(() => SaveService.PackageMedia(files.ToList()));
+                FeedbackText = "Datei erfolgreich hinzugefügt";
+            }
+            else
+            {
+                FeedbackText = "Fehler: Dateiendung nicht unterstützt";
+            }
         }      
 
         /// <summary>
         /// executes all methods to export the data to the usb stick
         /// </summary>
-        [RelayCommand(CanExecute =nameof(CanExport))]
+        [RelayCommand(CanExecute =nameof(DriveChosen))]
         public async Task Export()
         {   
-            //files to zip= Chaperts.DefaultChapter and config.json
-            List<string> filesToZip= new List<string>();
-            filesToZip.Add(Chapters.DefaultChapter);
-            foreach (Chapter chapter in Chapters.ChapterList)
-            {
-                filesToZip.Add(".\\state\\media\\"+chapter.Title);
-            }
-            await Task.Run(() => SaveService.SaveSettings(filesToZip));
-            filesToZip.Add(Environment.CurrentDirectory + "\\state\\config.json");
-            await Task.Run(() => SaveService.PackageMedia(filesToZip));
-            string rootPath = Path.GetPathRoot(Environment.CurrentDirectory);
             Extension.Export.CreateExportFolders(SelectedDrive.Name);
         }
 
