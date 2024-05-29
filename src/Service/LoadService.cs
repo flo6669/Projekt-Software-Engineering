@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using Effektive_Praesentationen.Extension;
 
 namespace Effektive_Praesentationen.Service
 {
@@ -14,14 +16,20 @@ namespace Effektive_Praesentationen.Service
         /// <summary>
         /// loads the media files from the zip file and adds them to the application
         /// </summary>
-        public List<Chapter>? UnpackageMedia()
+        public ObservableCollection<Chapter>? UnpackageMedia()
         {
-            List<Chapter> chapterList= new List<Chapter>();
+            ObservableCollection<Chapter> chapterList = new ObservableCollection<Chapter>();
+            string stateDirectoryPath = Environment.CurrentDirectory + "\\state";
             string zipFilePath = Environment.CurrentDirectory + "\\state\\media.zip";
-            //if zip file does not exist, return
-            if (!File.Exists(zipFilePath))
+            if(!Directory.Exists(stateDirectoryPath))   //in case the state folder doesn't exist
             {
-                return chapterList;
+                Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory,"state"));
+            }
+            if(!File.Exists(zipFilePath))    //in case the zip file doesn't exist
+            {
+                using(ZipArchive archive = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
+                {
+                }
             }
             using (ZipArchive archive = ZipFile.OpenRead(zipFilePath))
             {

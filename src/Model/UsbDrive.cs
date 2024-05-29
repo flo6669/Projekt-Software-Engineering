@@ -18,8 +18,10 @@ namespace Effektive_Praesentationen.Model
         {
             if (Path.GetPathRoot(Environment.CurrentDirectory) == Name)
                 return "Desktop";
+            else if(VolumeLabel == null)
+                return Name;
             else
-                return $"{Name}{VolumeLabel}  Freier Platz: {TotalFreeSpace} MB";
+                return $"{Name}{VolumeLabel}  Free Space: {TotalFreeSpace} MB";
         }
     }
 }

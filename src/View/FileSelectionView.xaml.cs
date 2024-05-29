@@ -29,5 +29,10 @@ namespace Effektive_Praesentationen.View
         {
 
         }
+
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

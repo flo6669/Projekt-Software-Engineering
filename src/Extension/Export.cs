@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Windows;
 
 namespace Effektive_Praesentationen.Extension
 {
@@ -8,6 +9,7 @@ namespace Effektive_Praesentationen.Extension
     public class Export
     {
         const String topFolderName = "Effektive Praesentationen";
+        static String newAppPath;
         /// <summary>
         /// Creates the folders for the export
         /// </summary>
@@ -24,13 +26,13 @@ namespace Effektive_Praesentationen.Extension
                 Console.WriteLine("Exporting to: " + path);
                 if (Directory.Exists(Path.Combine(path, topFolderName)))
                 {
-                    var newAppPath = Path.Combine(path, topFolderName);
+                    newAppPath = Path.Combine(path, topFolderName);
                     CopyZip(newAppPath);
                 }
                 else
                 {
                     CreateFolder(path, topFolderName);
-                    var newAppPath = Path.Combine(path, topFolderName);
+                    newAppPath = Path.Combine(path, topFolderName);
                     CreateFolder(newAppPath, "state");
                     //CopyFonts(newAppPath);
                     CopyExe(newAppPath);
@@ -38,10 +40,12 @@ namespace Effektive_Praesentationen.Extension
                     CopyDlls(newAppPath);
                 }
                 Console.WriteLine("Export successful");
+                MessageBox.Show("Export successfull", "Success", MessageBoxButton.OK);
             }
             catch (Exception)
             {
-                throw new Exception("Unable to create folders");
+                Directory.Delete(newAppPath, true);
+                MessageBox.Show("Export failed: Check the avaible space and your permissions on the drive", "Error", MessageBoxButton.OK);
             }
         }
 

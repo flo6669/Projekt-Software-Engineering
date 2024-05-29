@@ -1,4 +1,5 @@
 ﻿using Effektive_Praesentationen.Model;
+using Effektive_Praesentationen.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,6 +18,8 @@ namespace Effektive_Praesentationen.Service
         private ManagementEventWatcher? _removalWatcher;
 
         public ObservableCollection<UsbDrive> UsbDrives { get; set; } = new ObservableCollection<UsbDrive>();
+
+        public event Action UpdateSelectedDrive;
 
         public UsbService()
         {
@@ -58,12 +61,13 @@ namespace Effektive_Praesentationen.Service
         private void Watcher_EventArrived(object sender, EventArrivedEventArgs e)
         {
             GetUsbInfo();
+            UpdateSelectedDrive?.Invoke();
         }
 
         /// <summary>
         /// gets information of all removable drives
         /// </summary>
-        private void GetUsbInfo()
+        public void GetUsbInfo()
         {
             DriveInfo[] drives = DriveInfo.GetDrives();
             Application.Current.Dispatcher.Invoke(() => UsbDrives.Clear());
@@ -84,6 +88,8 @@ namespace Effektive_Praesentationen.Service
                     });
                 }
             }
+            if(UsbDrives.Count==0)
+                Application.Current.Dispatcher.Invoke(() => UsbDrives.Add(new UsbDrive { Name = "Please insert drive" }));  
         }
     }
 }

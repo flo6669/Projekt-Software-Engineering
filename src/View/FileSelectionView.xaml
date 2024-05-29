@@ -88,15 +88,38 @@
                 </Button>
             </Border>
         </StackPanel>
-        <ComboBox ItemsSource="{Binding UsbService.UsbDrives}" VerticalAlignment="Top" HorizontalAlignment="Left" Height="30" Width="225" SelectedItem="{Binding SelectedDrive}" SelectionChanged="ComboBox_SelectionChanged">
+        <ComboBox ItemsSource="{Binding UsbService.UsbDrives}"
+                  VerticalAlignment="Top" 
+                  HorizontalAlignment="Left" 
+                  Height="30" Width="225"
+                  SelectedItem="{Binding SelectedDrive}">
             <ComboBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock  Text="{Binding}"/>
                 </DataTemplate>
             </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Content="Present" Height="32" Width="128" VerticalAlignment="Bottom" HorizontalAlignment="Right" Command="{Binding NavigateToInactiveLoopCommand}" 
-                BorderBrush="{x:Null}" Margin="0,0,24,24" Style="{StaticResource PresentButtonStyle}">
+        <ListBox ItemsSource="{Binding Chapters.ChapterList}"
+                 VerticalAlignment="Bottom" 
+                 Width="300"
+                 Height="100"
+                 SelectedItem="{Binding SelectedChapter}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Title}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Content="Delete" Height="32" Width="128" VerticalAlignment="Bottom" HorizontalAlignment="Right" Command="{Binding DeleteChapterCommand}" 
+        BorderBrush="{x:Null}" Margin="0,0,24,24" Style="{StaticResource PresentButtonStyle}">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="16"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+        <Button Content="Present" Height="32" Width="128" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding NavigateToInactiveLoopCommand}" 
+                BorderBrush="{x:Null}" Margin="0,24,24,0" Style="{StaticResource PresentButtonStyle}">
             <Button.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius" Value="16"/>

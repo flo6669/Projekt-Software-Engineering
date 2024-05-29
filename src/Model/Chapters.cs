@@ -12,16 +12,10 @@ namespace Effektive_Praesentationen.Model
 {
     public partial class Chapters : ObservableObject
     {
-        public Chapters()
-        {
-            ChapterList = new List<Chapter>();
-        }
-
         [ObservableProperty]
         private string? defaultChapter;
 
-        [ObservableProperty]
-        private List<Chapter>? chapterList;
+        public ObservableCollection<Chapter>  ChapterList { get; set; } = new ObservableCollection<Chapter>();
 
         [ObservableProperty]
         private string? databasePath;

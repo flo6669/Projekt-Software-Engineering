@@ -10,12 +10,17 @@ namespace Effektive_Praesentationen.Model
     public partial class Chapter : ObservableObject
     {
         [ObservableProperty]
-        private string? title;
+        public string? _title;
 
         [ObservableProperty]
-        private string? description;
+        public string? _description;
 
         [ObservableProperty]
-        private bool loop;
+        private bool _loop;
+
+        public override string ToString()
+        {
+            return Title;
+        }
     }
 }
