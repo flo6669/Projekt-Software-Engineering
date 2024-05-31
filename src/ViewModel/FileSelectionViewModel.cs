@@ -132,8 +132,7 @@ namespace Effektive_Praesentationen.ViewModel
         /// </summary>
         public bool ChapterChosen
         {
-            FileToAdd = files[0];
-            if(FileValid)
+            get
             {
                 if (SelectedChapter == null)
                 {
@@ -144,7 +143,7 @@ namespace Effektive_Praesentationen.ViewModel
                     return true;
                 }
             }
-        }   
+        }
 
         public async Task OnFilesDropped(string[] files)
         {
