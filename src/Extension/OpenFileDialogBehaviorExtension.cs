@@ -34,7 +34,7 @@ namespace Effektive_Praesentationen.Extension
         {
             var openFileDialog = new OpenFileDialog
             {
-                Multiselect = false,
+                Multiselect = true,
                 Filter = "All Files (*.*)|*.*",
                 Title = "Select a File"
             };

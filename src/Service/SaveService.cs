@@ -12,73 +12,34 @@ namespace Effektive_Praesentationen.Service
 {
     public class SaveService
     {
-        private readonly object _zipLock = new object();
         /// <summary>
-        /// creates a zip file locally,
-        /// also checks for duplicate files names and changes them
+        /// saves the files locally
         /// </summary>
-        ///  <param name="fileToZip">file that is supposed to be zipped</param>>
-        public string PackageMedia(string fileToZip)
+        ///  <param name="fileToSave">files that are supposed to be saved</param>>
+        public void SaveMedia(string[] filesToSave)
         {
-            string zipFilePath = Environment.CurrentDirectory + "\\state\\media.zip";
-            string fileName = Path.GetFileName(fileToZip);
-            lock (_zipLock) //make sure only one thread can access the zip file at a time
+            foreach (string fileToSave in filesToSave)
             {
-                using ZipArchive zip = ZipFile.Open(zipFilePath, ZipArchiveMode.Update);
-                //delete old json config file in zip file
-                ZipArchiveEntry? oldConfig = zip.GetEntry("config.json");
-                if (oldConfig != null)
+                //wenn fileToSave nicht in state\\media liegt, dann kopiere es dorthin
+                string mediaFolderPath = Environment.CurrentDirectory + "\\state\\media";
+                string targetFilePath = Path.Combine(mediaFolderPath, Path.GetFileName(fileToSave));
+                if (!File.Exists(targetFilePath))
                 {
-                    oldConfig.Delete();
+                    File.Copy(fileToSave, targetFilePath);
                 }
-
-                //check for duplicate file names
-                string[] filesAlreadyZipped = zip.Entries.Select(entry => entry.FullName).ToArray();
-                int counter = 1;
-                string targetFilePath = Path.Combine(zipFilePath, fileName);
-                string fileExtension = Path.GetExtension(fileToZip);
-                while (filesAlreadyZipped.Contains(fileName))
-                {
-                    fileName = Path.GetFileNameWithoutExtension(fileToZip) + "(" + counter + ")" + fileExtension;
-                    targetFilePath = Path.Combine(zipFilePath, fileName);
-                    counter++;
-                }
-                zip.CreateEntryFromFile(fileToZip, fileName);
-                
             }
-            return fileName;
+
         }
 
-        /// <summary>
-        /// saves settings locally in a json file
-        /// </summary>
-        public void SaveSettings(List<string> filePaths)
+        public void DeleteMedia(string[] filesToDelete)
         {
-            string savePath = Environment.CurrentDirectory + "\\state\\config.json";
-            //delete old json config file
-            if (File.Exists(savePath))
+            foreach(string fileToDelete in filesToDelete)
             {
-                File.Delete(savePath);
-            }
-            //convert Chapter List in json string
-            foreach(string filePath in filePaths)
-            {
-                string jsonString = System.Text.Json.JsonSerializer.Serialize(Path.GetFileName(filePath));
-                //write json string to file
-                File.WriteAllText(savePath, jsonString);
-            }
-        }
-
-        public void DeleteChapter(string chapterName)
-        {
-            string zipFilePath = Environment.CurrentDirectory + "\\state\\media.zip";
-            lock(_zipLock) //make sure only one thread can access the zip file at a time
-            {
-                using ZipArchive zip = ZipFile.Open(zipFilePath, ZipArchiveMode.Update);
-                ZipArchiveEntry? entryToDelete = zip.GetEntry(chapterName);
-                if (entryToDelete != null)
+                string mediaFolderPath = Environment.CurrentDirectory + "\\state\\media";
+                string targetFilePath = Path.Combine(mediaFolderPath, Path.GetFileName(fileToDelete));
+                if (File.Exists(targetFilePath))
                 {
-                    entryToDelete.Delete();
+                    File.Delete(targetFilePath);
                 }
             }
         }

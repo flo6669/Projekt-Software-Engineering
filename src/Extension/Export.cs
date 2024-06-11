@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using Effektive_Praesentationen.Model;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows;
 
 namespace Effektive_Praesentationen.Extension
@@ -15,7 +17,7 @@ namespace Effektive_Praesentationen.Extension
         /// </summary>
         /// <param name="path">Absolute path to the folder</param>
         /// <exception cref="Exception">Throws an exception if the folders could not be created</exception>
-        public static void CreateExportFolders(string path)
+        public static void ExportFolders(string path, ObservableCollection<Chapter> chapterList)
         {
             try
             {
@@ -27,16 +29,18 @@ namespace Effektive_Praesentationen.Extension
                 if (Directory.Exists(Path.Combine(path, topFolderName)))
                 {
                     newAppPath = Path.Combine(path, topFolderName);
-                    CopyZip(newAppPath);
+                    CopyMedia(newAppPath,chapterList);
                 }
                 else
                 {
                     CreateFolder(path, topFolderName);
                     newAppPath = Path.Combine(path, topFolderName);
                     CreateFolder(newAppPath, "state");
-                    //CopyFonts(newAppPath);
+                    CreateFolder(newAppPath + "\\state", "media");
+                    CreateFolder(newAppPath, "fonts");
+                    CopyFonts(newAppPath);
                     CopyExe(newAppPath);
-                    CopyZip(newAppPath);
+                    CopyMedia(newAppPath,chapterList);
                     CopyDlls(newAppPath);
                 }
                 Console.WriteLine("Export successful");
@@ -54,7 +58,7 @@ namespace Effektive_Praesentationen.Extension
         {
             try
             {
-                string[] dlls = { "CommunityToolkit.Mvvm.dll", "Effektive_Praesentationen.deps.json", "Effektive_Praesentationen.dll", "Effektive_Praesentationen.pdb", "Effektive_Praesentationen.runtimeconfig.json", "MetadataExtractor.dll", "Microsoft.Extensions.DependencyInjection.Abstractions.dll", "Microsoft.Extensions.DependencyInjection.dll", "System.Management.dll", "XmpCore.dll" };
+                string[] dlls = { "CommunityToolkit.Mvvm.dll", "Effektive_Praesentationen.deps.json", "Effektive_Praesentationen.dll", "Effektive_Praesentationen.pdb", "Effektive_Praesentationen.runtimeconfig.json", "MetadataExtractor.dll", "Microsoft.Extensions.DependencyInjection.Abstractions.dll", "Microsoft.Extensions.DependencyInjection.dll", "System.Management.dll", "XmpCore.dll","System.Drawing.Common.dll" };
                 foreach (string dll in dlls)
                 {
                     File.Copy(Path.Combine(Environment.CurrentDirectory, dll), Path.Combine(newAppPath, dll), true);
@@ -167,15 +171,27 @@ namespace Effektive_Praesentationen.Extension
         /// </summary>
         /// <param name="path">Absolute path to the folder</param>
         /// <exception cref="Exception">Throws an exception if the config could not be copied</exception>
-        private static void CopyZip(string path)
+        private static void CopyMedia(string path, ObservableCollection<Chapter> chapterList)
         {
             try
             {
-                File.Copy(Path.Combine(Environment.CurrentDirectory, "state\\media.zip"), Path.Combine(path, "state\\media.zip"), true);
+                //delete old media in folder
+                string mediaFolderPath = Path.Combine(path, "state", "media");
+                foreach(string file in Directory.GetFiles(mediaFolderPath))
+                {
+                    File.Delete(file);
+                }
+                //add new media
+                foreach (Chapter chapter in chapterList)
+                {
+                    string savePath = Path.Combine(path, "state", "media",chapter.Title);
+                    if (File.Exists(chapter.Path))
+                        File.Copy(chapter.Path, savePath);
+                }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                throw new Exception("Unable to copy zip");
+                throw new Exception("Unable to copy media"+ e);
             }
         }
     }

@@ -8,7 +8,8 @@
         xmlns:viewModel="clr-namespace:Effektive_Praesentationen.ViewModel" 
         xmlns:view="clr-namespace:Effektive_Praesentationen.View"
         mc:Ignorable="d"
-        Title="{Binding WindowTitle}" Height="450" Width="800">
+        Title="{Binding WindowTitle}" Height="450" Width="800"
+        Closing="Window_Closing">
 
     <Grid>
         <Frame NavigationUIVisibility="Hidden" Content="{Binding Navigation.CurrentViewModel}"/>

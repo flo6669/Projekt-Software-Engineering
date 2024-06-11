@@ -12,6 +12,6 @@ namespace Effektive_Praesentationen.Extension
     /// </summary>
     internal interface IOpenFileDialog
     {
-        Task OnFileSelected(string[] files);
+        void OnFileSelected(string[] files);
     }
 }

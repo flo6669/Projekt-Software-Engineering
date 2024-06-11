@@ -13,10 +13,8 @@ namespace Effektive_Praesentationen.Model
         public string? _title;
 
         [ObservableProperty]
-        public string? _description;
+        public string? _path;
 
-        [ObservableProperty]
-        private bool _loop;
 
         public override string ToString()
         {

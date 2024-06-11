@@ -14,7 +14,10 @@ using System.Runtime.InteropServices;
 using System.Collections.ObjectModel;
 using System.Management;
 using System.Windows;
+using System.Windows.Input;
 using System.IO.Compression;
+using System.Diagnostics;
+
 
 namespace Effektive_Praesentationen.ViewModel
 {
@@ -23,6 +26,7 @@ namespace Effektive_Praesentationen.ViewModel
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(ChapterChosen))]
         [NotifyCanExecuteChangedFor(nameof(DeleteChapterCommand))]
+        [NotifyCanExecuteChangedFor(nameof(OpenDefaultMediaPlayerCommand))]
         private Chapter? _selectedChapter;
 
         [ObservableProperty]
@@ -39,6 +43,12 @@ namespace Effektive_Praesentationen.ViewModel
 
         [ObservableProperty]
         public string? _feedbackText;
+
+        private List<string> saveList= new List<string>();
+        private List<string> deleteList = new List<string>();
+
+        [ObservableProperty]
+        public bool _isModified = false;
 
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(DriveChosen))]
@@ -57,6 +67,9 @@ namespace Effektive_Praesentationen.ViewModel
         [ObservableProperty]
         public LoadService _loadService;
 
+        [ObservableProperty]
+        public MediaPlayerService _mediaPlayerService;
+
 
         public FileSelectionViewModel(INavigationService navService)
         {
@@ -67,6 +80,7 @@ namespace Effektive_Praesentationen.ViewModel
             Application.Current.Dispatcher.Invoke(() => SelectedDrive = UsbService.UsbDrives.Last());
             SaveService = new SaveService();
             LoadService = new LoadService();
+            MediaPlayerService = new MediaPlayerService();
             viewName = "FileSelection";
             Import();
         }
@@ -92,14 +106,25 @@ namespace Effektive_Praesentationen.ViewModel
         {
             get
             {
+                string fileExtension = Path.GetExtension(FileToAdd);
+                List<string> validExtensions = new List<string> { ".mp4", ".mkv", ".mov", ".pdf", ".pptx" };
                 if (String.IsNullOrEmpty(FileToAdd))
                 {
                     return false;
                 }
-                string fileExtension = Path.GetExtension(FileToAdd);
-                List<string> validExtensions = new List<string> { ".mp4", ".mkv", ".mov", ".pdf",".pptx" };
-                if (!validExtensions.Contains(fileExtension))
+                else if (!validExtensions.Contains(fileExtension))
                 {
+                    FeedbackText = "Error: File extension not supported";
+                    return false;
+                }
+                else if (Chapters.ChapterList.Any(chapter => chapter.Path == FileToAdd))
+                {
+                    FeedbackText = "Error: File already added";
+                    return false;
+                }
+                else if(Chapters.ChapterList.Any(chapter => chapter.Title == Path.GetFileName(FileToAdd)))
+                {
+                    FeedbackText = "Error: File name already exists";
                     return false;
                 }
                 else
@@ -145,34 +170,32 @@ namespace Effektive_Praesentationen.ViewModel
             }
         }
 
-        public async Task OnFilesDropped(string[] files)
-        {
-            FileToAdd = files[0];
-            if(FileValid)
-            {
-                string fileName=await Task.Run(() => SaveService.PackageMedia(files[0]));
-                Chapters.ChapterList.Add(new Chapter { Description = "Description", Title = Path.GetFileName(fileName), Loop = false });
-                FeedbackText = "File successfully added";
-            }
-            else
-            {
-                FeedbackText = "Error: File extension not supported";
-            }
-        }
-
-        public async Task OnFileSelected(string[] files)
+        public void OnFilesDropped(string[] files)
         {
             FileToAdd = files[0];
             FeedbackText = "";
             if (FileValid)
             {
-                string fileName=await Task.Run(() => SaveService.PackageMedia(files[0]));
-                Chapters.ChapterList.Add(new Chapter { Description = "Description", Title = Path.GetFileName(fileName), Loop = false });
+                Chapters.ChapterList.Add(new Chapter { Path = FileToAdd, Title = Path.GetFileName(FileToAdd) });
                 FeedbackText = "File successfully added";
+                saveList.Add(FileToAdd);
+                IsModified = true;
             }
-            else
-            {
-                FeedbackText = "Error: File extension not supported";
+        }
+
+        public void OnFileSelected(string[] files)
+        {
+            
+            FeedbackText = "";
+            foreach (var file in files){
+                FileToAdd = file;
+                if (FileValid)
+                {
+                    Chapters.ChapterList.Add(new Chapter { Path = FileToAdd, Title = Path.GetFileName(FileToAdd) });
+                    FeedbackText = "File successfully added";
+                    saveList.Add(FileToAdd);
+                    IsModified = true;
+                }
             }
         }
         
@@ -190,9 +213,14 @@ namespace Effektive_Praesentationen.ViewModel
             MessageBoxResult result = MessageBox.Show("Do you want to export the data to the selected drive?", "Export", MessageBoxButton.YesNo);
             if (result==MessageBoxResult.Yes)
             {
-                await Task.Run(() => Extension.Export.CreateExportFolders(SelectedDrive.Name));
+                Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+                await Task.Run(() => SaveService.SaveMedia(saveList.ToArray()));
+                await Task.Run(() => SaveService.DeleteMedia(deleteList.ToArray()));
+                await Task.Run(() => Extension.Export.ExportFolders(SelectedDrive.Name,Chapters.ChapterList));
                 UsbService.GetUsbInfo();
                 UpdateSelectedDrive();
+                IsModified = false;
+                Mouse.OverrideCursor = null;
             }
         }
 
@@ -201,16 +229,25 @@ namespace Effektive_Praesentationen.ViewModel
         /// </summary>
         public async Task Import()
         { 
-            Chapters.ChapterList=await Task.Run(() => LoadService.UnpackageMedia());
+            Chapters.ChapterList=await Task.Run(() => LoadService.LoadMedia());
+            await Task.Run(() => LoadService.LoadFonts());
         }
 
         [RelayCommand(CanExecute =nameof(ChapterChosen))]
-        public async Task DeleteChapter()
+        public void DeleteChapter()
         {
-            await Task.Run(() => SaveService.DeleteChapter(SelectedChapter.Title));
+            deleteList.Add(SelectedChapter.Path);
             Chapters.ChapterList.Remove(SelectedChapter);
             FeedbackText = "File successfully removed";
+            IsModified = true;
         }
 
+        [RelayCommand(CanExecute = nameof(ChapterChosen))]
+        public async Task OpenDefaultMediaPlayer()
+        {
+            //open Default Media Player using Service
+            await Task.Run(() => MediaPlayerService.OpenMediaPlayer(SelectedChapter.Path));
+
+        }
     }
 }

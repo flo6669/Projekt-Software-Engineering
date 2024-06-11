@@ -10,7 +10,8 @@
              mc:Ignorable="d"
              Background="#ffffff"
              d:DesignHeight="450" d:DesignWidth="800"
-             xmlns:System="clr-namespace:System;assembly=System.Runtime">
+             xmlns:System="clr-namespace:System;assembly=System.Runtime"
+             >
     <UserControl.Resources>
         <System:String x:Key="DragAreaText">Drop files here or click to upload</System:String>
 
@@ -40,6 +41,7 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+      
         <Style x:Key="ExportButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#20E378" />
             <Setter Property="Foreground" Value="White"/>
@@ -54,8 +56,13 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
     </UserControl.Resources>
 
+    
+    
+    
+    
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -118,7 +125,7 @@
                 </Style>
             </Button.Resources>
         </Button>
-        <Button Content="Present" Height="32" Width="128" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding NavigateToInactiveLoopCommand}" 
+        <Button Content="Present" Height="32" Width="128" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding OpenDefaultMediaPlayerCommand}" 
                 BorderBrush="{x:Null}" Margin="0,24,24,0" Style="{StaticResource PresentButtonStyle}">
             <Button.Resources>
                 <Style TargetType="Border">

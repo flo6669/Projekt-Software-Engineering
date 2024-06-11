@@ -12,6 +12,6 @@ namespace Effektive_Praesentationen.Extension
     /// </summary>
     public interface IFilesDropped
     {
-        Task OnFilesDropped(string[] files);
+        void OnFilesDropped(string[] files);
     }
 }
