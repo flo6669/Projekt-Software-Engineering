@@ -5,11 +5,16 @@
              xmlns:view="clr-namespace:Effektive_Praesentationen.View"
              xmlns:local="clr-namespace:Effektive_Praesentationen">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type viewModel:FileSelectionViewModel}">
-            <view:FileSelectionView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModel:InactiveLoopViewModel}">
-            <view:InactiveLoopView/>
-        </DataTemplate>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Assets/selectAreaBackground.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <DataTemplate DataType="{x:Type viewModel:FileSelectionViewModel}">
+                <view:FileSelectionView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModel:InactiveLoopViewModel}">
+                <view:InactiveLoopView/>
+            </DataTemplate>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -82,7 +82,7 @@ namespace Effektive_Praesentationen.Service
             }
             if(fontsMissing)
             {
-                MessageBox.Show("Some fonts are missing. They wont be displayed in the media.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Some fonts are missing. They won't be displayed in the media.", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         /// <summary>
