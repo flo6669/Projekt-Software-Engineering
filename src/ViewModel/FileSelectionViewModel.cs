@@ -50,10 +50,15 @@ namespace Effektive_Praesentationen.ViewModel
         [ObservableProperty]
         public bool _isModified = false;
 
+        private bool OnDesktop = false;
+
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(DriveChosen))]
         [NotifyCanExecuteChangedFor(nameof(ExportCommand))]
         private UsbDrive? _selectedDrive;
+
+        [ObservableProperty]
+        private string _buttonText = "Export";
 
         [ObservableProperty]
         private INavigationService _navigation;
@@ -83,6 +88,7 @@ namespace Effektive_Praesentationen.ViewModel
             MediaPlayerService = new MediaPlayerService();
             viewName = "FileSelection";
             Import();
+            UpdateSelectedDrive();
         }
 
         /// <summary>
@@ -147,6 +153,16 @@ namespace Effektive_Praesentationen.ViewModel
                 }
                 else
                 {
+                    if (SelectedDrive.Name == Path.GetPathRoot(Environment.CurrentDirectory))
+                    {
+                        ButtonText = "Install";
+                        OnDesktop = false;
+                    }
+                    else
+                    {
+                        ButtonText = "Export";
+                        OnDesktop = true;
+                    }
                     return true;
                 }
             }
@@ -201,7 +217,7 @@ namespace Effektive_Praesentationen.ViewModel
         
         public void UpdateSelectedDrive()
         {
-            Application.Current.Dispatcher.Invoke(() => SelectedDrive = UsbService.UsbDrives.Last());
+            Application.Current.Dispatcher.Invoke(() => SelectedDrive = UsbService.UsbDrives.Last());   
         }
 
         /// <summary>
@@ -210,13 +226,19 @@ namespace Effektive_Praesentationen.ViewModel
         [RelayCommand(CanExecute =nameof(DriveChosen))]
         public async Task Export()
         {
-            MessageBoxResult result = MessageBox.Show("Do you want to export the data to the selected drive?", "Export", MessageBoxButton.YesNo);
+            MessageBoxResult result;
+            if(!OnDesktop)
+            {
+                result=MessageBox.Show("Do you want to install the data on the desktop?", "Install", MessageBoxButton.YesNo);
+            }
+            else
+                result = MessageBox.Show("Do you want to export the data to the selected drive?", "Export", MessageBoxButton.YesNo);
             if (result==MessageBoxResult.Yes)
             {
                 Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
                 await Task.Run(() => SaveService.SaveMedia(saveList.ToArray()));
                 await Task.Run(() => SaveService.DeleteMedia(deleteList.ToArray()));
-                await Task.Run(() => Extension.Export.ExportFolders(SelectedDrive.Name,Chapters.ChapterList));
+                await Task.Run(() => Extension.Export.ExportFolders(SelectedDrive.Name,Chapters.ChapterList,OnDesktop));
                 UsbService.GetUsbInfo();
                 UpdateSelectedDrive();
                 IsModified = false;

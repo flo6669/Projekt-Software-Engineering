@@ -12,6 +12,7 @@ using System.Drawing.Text;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.IO.Enumeration;
 
 namespace Effektive_Praesentationen.Service
 {
@@ -54,17 +55,17 @@ namespace Effektive_Praesentationen.Service
                 Directory.CreateDirectory(Environment.CurrentDirectory + "\\fonts");
             }
 
-            string[] fontNames = { "ZEISS Frutiger Next W1G","ZEISS Frutiger Next W1G Cn", "ZEISS Frutiger Next W1G Heav", "ZEISS Frutiger Next W1G Hv Cn",
-                                   "ZEISS Frutiger Next W1GLight", "ZEISS Frutiger Next W1G Lt Cn", "ZEISS Frutiger Next W1G Md Cn", "ZEISS Frutiger Next W1G Medium" };
+            string[] fontNames = { "ZEISS Frutiger Next W1G" };
             bool fontsMissing = false;
             foreach (string fontName in fontNames)
             {
                 if (FontIsInstalled(fontName))
                 {
-                    if(!File.Exists(Environment.CurrentDirectory + "\\fonts\\" + fontName + ".ttf"))
+                    string fontPath = GetFontFilePath(fontName);
+                    if (!File.Exists(Environment.CurrentDirectory + "\\fonts\\" + fontName + ".ttf"))
                     {
                         //copy font to folder
-                        File.Copy(Environment.GetFolderPath(Environment.SpecialFolder.Fonts) + "\\" + fontName + ".ttf", Environment.CurrentDirectory + "\\fonts\\" + fontName + ".ttf");
+                        File.Copy(fontPath, Environment.CurrentDirectory + "\\fonts\\" + fontName +".ttf");
                     }
                 }
                 else if(File.Exists(Environment.CurrentDirectory + "\\fonts\\" + fontName + ".ttf"))
@@ -94,15 +95,10 @@ namespace Effektive_Praesentationen.Service
         {
             using (InstalledFontCollection installedFonts = new InstalledFontCollection())
             {
-                foreach (var fontFamily in installedFonts.Families)
                 {
-                    if (fontFamily.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
+                    return installedFonts.Families.Any(fontFamily => fontFamily.Name.Equals(fontName, StringComparison.OrdinalIgnoreCase));
                 }
             }
-            return false;
         }
 
         static void InstallFont(string fontPath, string fontName)
@@ -137,7 +133,7 @@ namespace Effektive_Praesentationen.Service
             }
         }
 
-        // Native Methoden zum Aktualisieren des System-Caches
+        // methods for refreshing system cache
         [DllImport("gdi32.dll")]
         private static extern int AddFontResource(string lpFileName);
 
@@ -146,5 +142,29 @@ namespace Effektive_Praesentationen.Service
 
         private const int HWND_BROADCAST = 0xffff;
         private const int WM_FONTCHANGE = 0x001D;
+
+        static string GetFontFilePath(string fontName)
+        {
+            // path to registry key for installed fonts
+            string fontsRegistryPath = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Fonts";
+
+            using (RegistryKey key = Registry.LocalMachine.OpenSubKey(fontsRegistryPath))
+            {
+                if (key != null)
+                {
+                    foreach (string fontRegKey in key.GetValueNames())
+                    {
+                        // check if registry name == searched font name
+                        string fontFileName = key.GetValue(fontRegKey) as string;
+                        if (fontRegKey.Contains(fontName, StringComparison.OrdinalIgnoreCase) && fontFileName != null)
+                        {
+                            string fontFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), fontFileName);
+                            return fontFilePath;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

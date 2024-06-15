@@ -25,14 +25,16 @@ namespace Effektive_Praesentationen.View
             InitializeComponent();
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-
-        }
-
-        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
+            if(sender is ListBox listBox)
+            {
+                if(listBox.SelectedItem != null)
+                {
+                    var viewModel = DataContext as ViewModel.FileSelectionViewModel;
+                    viewModel?.OpenDefaultMediaPlayerCommand.Execute(null);
+                }
+            }
         }
     }
 }

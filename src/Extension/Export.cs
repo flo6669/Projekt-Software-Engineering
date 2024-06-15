@@ -1,6 +1,7 @@
 ﻿using Effektive_Praesentationen.Model;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 
 namespace Effektive_Praesentationen.Extension
@@ -17,19 +18,21 @@ namespace Effektive_Praesentationen.Extension
         /// </summary>
         /// <param name="path">Absolute path to the folder</param>
         /// <exception cref="Exception">Throws an exception if the folders could not be created</exception>
-        public static void ExportFolders(string path, ObservableCollection<Chapter> chapterList)
+        public static void ExportFolders(string path, ObservableCollection<Chapter> chapterList, bool onDesktop)
         {
             try
             {
                 if (path == Path.GetPathRoot(Environment.CurrentDirectory))
                 {
                     path = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                 
                 }
                 Console.WriteLine("Exporting to: " + path);
                 if (Directory.Exists(Path.Combine(path, topFolderName)))
                 {
                     newAppPath = Path.Combine(path, topFolderName);
                     CopyMedia(newAppPath,chapterList);
+                    CopyFonts(newAppPath);
                 }
                 else
                 {
@@ -39,17 +42,32 @@ namespace Effektive_Praesentationen.Extension
                     CreateFolder(newAppPath + "\\state", "media");
                     CreateFolder(newAppPath, "fonts");
                     CopyFonts(newAppPath);
-                    CopyExe(newAppPath);
+                    string exeDestination=CopyExe(newAppPath);
                     CopyMedia(newAppPath,chapterList);
                     CopyDlls(newAppPath);
                 }
-                Console.WriteLine("Export successful");
-                MessageBox.Show("Export successfull", "Success", MessageBoxButton.OK);
+                if (onDesktop)
+                {
+                    MessageBox.Show("Export successfull", "Success", MessageBoxButton.OK);
+                }
+                else
+                {
+                    MessageBox.Show("Install successfull", "Success", MessageBoxButton.OK);
+                }
+                
             }
             catch (Exception)
             {
                 Directory.Delete(newAppPath, true);
-                MessageBox.Show("Export failed: Check the avaible space and your permissions on the drive", "Error", MessageBoxButton.OK);
+                if(onDesktop)
+                {
+                    MessageBox.Show("Export failed: Check the avaible space and your permissions", "Error", MessageBoxButton.OK);
+                }
+                else
+                {
+                    MessageBox.Show("Install failed: Check the avaible space and your permissions", "Error", MessageBoxButton.OK);
+                }
+                
             }
         }
 
@@ -61,7 +79,7 @@ namespace Effektive_Praesentationen.Extension
                 string[] dlls = { "CommunityToolkit.Mvvm.dll", "Effektive_Praesentationen.deps.json", "Effektive_Praesentationen.dll", "Effektive_Praesentationen.pdb", "Effektive_Praesentationen.runtimeconfig.json", "MetadataExtractor.dll", "Microsoft.Extensions.DependencyInjection.Abstractions.dll", "Microsoft.Extensions.DependencyInjection.dll", "System.Management.dll", "XmpCore.dll","System.Drawing.Common.dll" };
                 foreach (string dll in dlls)
                 {
-                    File.Copy(Path.Combine(Environment.CurrentDirectory, dll), Path.Combine(newAppPath, dll), true);
+                    System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, dll), Path.Combine(newAppPath, dll), true);
                 }
                 CopyFolder(Path.Combine(Environment.CurrentDirectory, "runtimes"), Path.Combine(newAppPath, "runtimes"), true);
             }
@@ -132,7 +150,7 @@ namespace Effektive_Praesentationen.Extension
         /// </summary>
         /// <param name="path">Absolute path to the folder</param>
         /// <exception cref="Exception">Throws an exception if the exe could not be copied</exception>
-        private static void CopyExe(string path)
+        private static string CopyExe(string path)
         {
             try
             {
@@ -142,7 +160,10 @@ namespace Effektive_Praesentationen.Extension
                     throw new Exception("Unable to get exe path");
                 }
                 string exePath = processPath;
-                File.Copy(exePath, Path.Combine(path, "Effektive_Praesentation.exe"), true);
+                string destination = Path.Combine(path, "Effektive_Praesentation.exe");
+                System.IO.File.Copy(exePath, destination, true);
+                return destination;
+
             }
             catch (Exception)
             {
@@ -159,7 +180,18 @@ namespace Effektive_Praesentationen.Extension
         {
             try
             {
-                CopyFolder(Path.Combine(Environment.CurrentDirectory, "fonts"), Path.Combine(path, "fonts"), false);
+                string source= Path.Combine(Environment.CurrentDirectory, "fonts");
+                string destination = Path.Combine(path, "fonts");
+                string[] files = Directory.GetFiles(source);
+                foreach (string file in files )
+                {
+                    string fileName= Path.GetFileName(file);
+                    string destFile = Path.Combine(destination, fileName);
+                    if (!System.IO.File.Exists(destFile))
+                    {
+                        System.IO.File.Copy(file, destFile);
+                    }
+                }
             }
             catch (Exception)
             {
@@ -179,14 +211,14 @@ namespace Effektive_Praesentationen.Extension
                 string mediaFolderPath = Path.Combine(path, "state", "media");
                 foreach(string file in Directory.GetFiles(mediaFolderPath))
                 {
-                    File.Delete(file);
+                    System.IO.File.Delete(file);
                 }
                 //add new media
                 foreach (Chapter chapter in chapterList)
                 {
                     string savePath = Path.Combine(path, "state", "media",chapter.Title);
-                    if (File.Exists(chapter.Path))
-                        File.Copy(chapter.Path, savePath);
+                    if (System.IO.File.Exists(chapter.Path))
+                        System.IO.File.Copy(chapter.Path, savePath);
                 }
             }
             catch (Exception e)
