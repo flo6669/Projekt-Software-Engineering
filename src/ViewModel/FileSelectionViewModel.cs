@@ -44,9 +44,6 @@ namespace Effektive_Praesentationen.ViewModel
         [ObservableProperty]
         public string? _feedbackText;
 
-        private List<string> saveList= new List<string>();
-        private List<string> deleteList = new List<string>();
-
         [ObservableProperty]
         public bool _isModified = false;
 
@@ -67,9 +64,6 @@ namespace Effektive_Praesentationen.ViewModel
         public UsbService _usbService;
 
         [ObservableProperty]
-        public SaveService _saveService;
-
-        [ObservableProperty]
         public LoadService _loadService;
 
         [ObservableProperty]
@@ -83,7 +77,6 @@ namespace Effektive_Praesentationen.ViewModel
             UsbService = new UsbService();
             UsbService.UpdateSelectedDrive += UpdateSelectedDrive;
             Application.Current.Dispatcher.Invoke(() => SelectedDrive = UsbService.UsbDrives.Last());
-            SaveService = new SaveService();
             LoadService = new LoadService();
             MediaPlayerService = new MediaPlayerService();
             viewName = "FileSelection";
@@ -194,7 +187,6 @@ namespace Effektive_Praesentationen.ViewModel
             {
                 Chapters.ChapterList.Add(new Chapter { Path = FileToAdd, Title = Path.GetFileName(FileToAdd) });
                 FeedbackText = "File successfully added";
-                saveList.Add(FileToAdd);
                 IsModified = true;
             }
         }
@@ -209,7 +201,6 @@ namespace Effektive_Praesentationen.ViewModel
                 {
                     Chapters.ChapterList.Add(new Chapter { Path = FileToAdd, Title = Path.GetFileName(FileToAdd) });
                     FeedbackText = "File successfully added";
-                    saveList.Add(FileToAdd);
                     IsModified = true;
                 }
             }
@@ -236,8 +227,6 @@ namespace Effektive_Praesentationen.ViewModel
             if (result==MessageBoxResult.Yes)
             {
                 Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
-                await Task.Run(() => SaveService.SaveMedia(saveList.ToArray()));
-                await Task.Run(() => SaveService.DeleteMedia(deleteList.ToArray()));
                 await Task.Run(() => Extension.Export.ExportFolders(SelectedDrive.Name,Chapters.ChapterList,OnDesktop));
                 UsbService.GetUsbInfo();
                 UpdateSelectedDrive();
@@ -258,7 +247,6 @@ namespace Effektive_Praesentationen.ViewModel
         [RelayCommand(CanExecute =nameof(ChapterChosen))]
         public void DeleteChapter()
         {
-            deleteList.Add(SelectedChapter.Path);
             Chapters.ChapterList.Remove(SelectedChapter);
             FeedbackText = "File successfully removed";
             IsModified = true;

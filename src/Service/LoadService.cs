@@ -24,14 +24,7 @@ namespace Effektive_Praesentationen.Service
         public ObservableCollection<Chapter>? LoadMedia()
         {
             ObservableCollection<Chapter> chapterList = new ObservableCollection<Chapter>();
-            if(!Directory.Exists(Environment.CurrentDirectory + "\\state"))
-            {
-                Directory.CreateDirectory(Environment.CurrentDirectory + "\\state");
-            }
-            if (!Directory.Exists(Environment.CurrentDirectory + "\\state\\media"))
-            {
-                Directory.CreateDirectory(Environment.CurrentDirectory + "\\state\\media");
-            }
+            
             //get files from media folder
             string mediaFolderPath = Environment.CurrentDirectory + "\\state\\media";
             if (Directory.Exists(mediaFolderPath))

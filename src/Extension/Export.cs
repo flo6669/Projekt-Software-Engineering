@@ -76,12 +76,14 @@ namespace Effektive_Praesentationen.Extension
         {
             try
             {
-                string[] dlls = { "CommunityToolkit.Mvvm.dll", "Effektive_Praesentationen.deps.json", "Effektive_Praesentationen.dll", "Effektive_Praesentationen.pdb", "Effektive_Praesentationen.runtimeconfig.json", "MetadataExtractor.dll", "Microsoft.Extensions.DependencyInjection.Abstractions.dll", "Microsoft.Extensions.DependencyInjection.dll", "System.Management.dll", "XmpCore.dll","System.Drawing.Common.dll" };
+                string[] dlls = { "CommunityToolkit.Mvvm.dll", "Effektive_Praesentationen.deps.json", "Effektive_Praesentationen.dll", "Effektive_Praesentationen.runtimeconfig.json", "MetadataExtractor.dll", "Microsoft.Extensions.DependencyInjection.Abstractions.dll", "Microsoft.Extensions.DependencyInjection.dll", "System.Management.dll", "XmpCore.dll","System.Drawing.Common.dll" };
                 foreach (string dll in dlls)
                 {
-                    System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, dll), Path.Combine(newAppPath, dll), true);
+                    if(System.IO.File.Exists(Path.Combine(Environment.CurrentDirectory, dll)))
+                        System.IO.File.Copy(Path.Combine(Environment.CurrentDirectory, dll), Path.Combine(newAppPath, dll), true);
                 }
-                CopyFolder(Path.Combine(Environment.CurrentDirectory, "runtimes"), Path.Combine(newAppPath, "runtimes"), true);
+                if(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "runtimes")))
+                    CopyFolder(Path.Combine(Environment.CurrentDirectory, "runtimes"), Path.Combine(newAppPath, "runtimes"), true);
             }
             catch (Exception)
             {
