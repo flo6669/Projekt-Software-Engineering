@@ -69,6 +69,9 @@ namespace Effektive_Praesentationen.ViewModel
         [ObservableProperty]
         public MediaPlayerService _mediaPlayerService;
 
+        [ObservableProperty]
+        public bool _isSpinnerVisible;
+
 
         public FileSelectionViewModel(INavigationService navService)
         {
@@ -226,12 +229,12 @@ namespace Effektive_Praesentationen.ViewModel
                 result = MessageBox.Show("Do you want to export the data to the selected drive?", "Export", MessageBoxButton.YesNo);
             if (result==MessageBoxResult.Yes)
             {
-                Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+                IsSpinnerVisible = true;
                 await Task.Run(() => Extension.Export.ExportFolders(SelectedDrive.Name,Chapters.ChapterList,OnDesktop));
                 UsbService.GetUsbInfo();
                 UpdateSelectedDrive();
                 IsModified = false;
-                Mouse.OverrideCursor = null;
+                IsSpinnerVisible=false;
             }
         }
 

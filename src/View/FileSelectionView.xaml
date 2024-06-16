@@ -56,7 +56,55 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <Style x:Key="SpinnerStyle" TargetType="Grid">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Width" Value="30" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="Background">
+                <Setter.Value>
+                    <VisualBrush>
+                        <VisualBrush.Visual>
+                            <Viewbox Width="30" Height="30">
+                                <Grid Width="30" Height="30">
+                                    <Path Width="30" Height="30" Stretch="Uniform" Fill="White" Data="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2,4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12" RenderTransformOrigin="0.5,0.5">
+                                        <Path.RenderTransform>
+                                            <RotateTransform/>
+                                        </Path.RenderTransform>
 
+                                        <Path.Style>
+                                            <Style>
+                                                <Style.Triggers>
+                                                    <Trigger Property="Image.IsEnabled" Value="True">
+                                                        <Trigger.EnterActions>
+                                                            <BeginStoryboard>
+                                                                <Storyboard>
+                                                                    <DoubleAnimation
+                                                                    
+                                                                    Storyboard.TargetProperty="RenderTransform.Angle"
+                                                                    From="0"
+                                                                    To="360"
+                                                                    Duration="0:0:2.5"
+                                                                    RepeatBehavior="Forever" />
+                                                                </Storyboard>
+                                                            </BeginStoryboard>
+                                                        </Trigger.EnterActions>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Path.Style>
+                                    </Path>
+                                </Grid>
+                            </Viewbox>
+                        </VisualBrush.Visual>
+                    </VisualBrush>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </UserControl.Resources>
 
     
@@ -133,7 +181,14 @@
         </ComboBox>
         <Button Content="Present" Height="32" Width="128" VerticalAlignment="Bottom" HorizontalAlignment="Right" Command="{Binding OpenDefaultMediaPlayerCommand}" 
                 BorderBrush="{x:Null}" Margin="0,0,10,10" Style="{StaticResource PresentButtonStyle}" Background="#FF20E378"/>
-            <Button Content="{Binding ButtonText}" Height="32" Width="128" VerticalAlignment="Top" HorizontalAlignment="Right" Command="{Binding ExportCommand}" 
-                BorderBrush="{x:Null}" Margin="0,20,10,0" Style="{StaticResource ExportButtonStyle}" Background="#FF233B6E"/>
+        <Grid HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,10,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid x:Name="Spinner" Height="30" Width="30" Style="{StaticResource SpinnerStyle}" Visibility="{Binding IsSpinnerVisible, Converter={StaticResource BooleanToVisibilityConverter}}" Grid.Column="0" />
+            <Button Content="{Binding ButtonText}" Height="32" Width="128" Command="{Binding ExportCommand}" 
+            BorderBrush="{x:Null}" Style="{StaticResource ExportButtonStyle}" Background="#FF233B6E" Margin="10,0,0,0" Grid.Column="1"/>
+        </Grid>
     </Grid>
 </UserControl>
